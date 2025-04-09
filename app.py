@@ -3,9 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
-st.title("🥃 Whisky Price Scraper")
+st.title("🥃 Whisky Price Scraper – The Whisky Exchange Edition")
 
-url = st.text_input("Paste Master of Malt Whisky URL here:")
+url = st.text_input("Paste The Whisky Exchange Whisky URL here:")
 
 if st.button("Scrape"):
     if url:
@@ -13,18 +13,17 @@ if st.button("Scrape"):
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.content, "html.parser")
 
-        # Product Name
-        product_name = soup.find("h1").text.strip()
+        # Product name
+        product_name_tag = soup.find("h1", class_="product-main__name")
+        product_name = product_name_tag.text.strip() if product_name_tag else "Name not found"
 
-        # Price using structured data tag
-        price_tag = soup.find("meta", {"property": "product:price:amount"})
-        price = price_tag["content"] if price_tag else "Price not found"
+        # Price
+        price_tag = soup.find("p", class_="product-action__price")
+        price = price_tag.text.strip() if price_tag else "Price not found"
 
-        # Reviews (optional fallback)
-        review_tag = soup.find("span", class_="review-count")
-        reviews = review_tag.text.strip() if review_tag else "No reviews"
+        # Review count (TWE doesn't always show this)
+        reviews = "Not available"  # placeholder
 
-        # Build Data
         data = {
             "Name": product_name,
             "Price": price,
