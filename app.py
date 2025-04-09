@@ -13,17 +13,18 @@ if st.button("Scrape"):
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.content, "html.parser")
 
-        # Product name
-        product_name_tag = soup.find("h1", class_="product-main__name")
+        # Product Name
+        product_name_tag = soup.find("h1", class_="product-card-details__title")
         product_name = product_name_tag.text.strip() if product_name_tag else "Name not found"
 
         # Price
         price_tag = soup.find("p", class_="product-action__price")
         price = price_tag.text.strip() if price_tag else "Price not found"
 
-        # Review count (TWE doesn't always show this)
-        reviews = "Not available"  # placeholder
+        # Reviews (TWE doesn't expose review counts publicly)
+        reviews = "Not available"
 
+        # Output Data
         data = {
             "Name": product_name,
             "Price": price,
