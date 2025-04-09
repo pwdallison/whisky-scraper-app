@@ -3,33 +3,41 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
-st.title("🥃 Whisky Price Scraper – The Whisky Exchange Edition")
+SCRAPER_API_KEY = "c60c11ec758bf09739d6adaba094b889"  # Your live key
 
-url = st.text_input("Paste The Whisky Exchange Whisky URL here:")
+st.title("🥃 Whisky Price Scraper – with ScraperAPI")
+
+url = st.text_input("Paste The Whisky Exchange or Master of Malt URL here:")
 
 if st.button("Scrape"):
     if url:
+        # ScraperAPI proxy
+        proxy_url = f"http://api.scraperapi.com/?api_key={SCRAPER_API_KEY}&url={url}"
         headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(url, headers=headers)
+        response = requests.get(proxy_url, headers=headers)
         soup = BeautifulSoup(response.content, "html.parser")
-        st.code(soup.prettify()[:2000])  # show first 2000 characters of HTML in the browser
 
-        # Product Name
-        product_name_tag = soup.find("h1", class_="product-card-details__title")
-        product_name = product_name_tag.text.strip() if product_name_tag else "Name not found"
-
-        # Price
+        # The Whisky Exchange selectors
+        name_tag = soup.find("h1", class_="product-card-details__title")
         price_tag = soup.find("p", class_="product-action__price")
-        price = price_tag.text.strip() if price_tag else "Price not found"
 
-        # Reviews (TWE doesn't expose review counts publicly)
-        reviews = "Not available"
+        # Master of Malt fallback selectors
+        if not name_tag:
+            name_tag = soup.find("h1")
+        if not price_tag:
+            price_tag = soup.find("meta", {"property": "product:price:amount"})
 
-        # Output Data
+        product_name = name_tag.text.strip() if name_tag else "Name not found"
+        price = (
+            price_tag["content"] if price_tag and price_tag.name == "meta"
+            else price_tag.text.strip() if price_tag
+            else "Price not found"
+        )
+
         data = {
             "Name": product_name,
             "Price": price,
-            "Reviews": reviews,
+            "Reviews": "Not available (blocked or not shown)"
         }
 
         df = pd.DataFrame([data])
