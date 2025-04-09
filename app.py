@@ -12,6 +12,7 @@ if st.button("Scrape"):
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.content, "html.parser")
+        st.code(soup.prettify()[:2000])  # show first 2000 characters of HTML in the browser
 
         # Product Name
         product_name_tag = soup.find("h1", class_="product-card-details__title")
